@@ -54,7 +54,7 @@
     const end = video.ended || state.ended;
     control.textContent = state.failed ? "Play" : end ? "Replay" : video.paused ? "Play" : "Pause";
     control.dataset.state = end ? "ended" : video.paused ? "paused" : "playing";
-    control.setAttribute("aria-label",control.textContent+" films");
+    control.setAttribute("aria-label",control.textContent+" Films");
   }
   function loadVideo(video, carry=0) {
     const state=stateFor(video);
@@ -231,7 +231,7 @@
   });
   function syncQuiet(){
     if(!quietControl)return;
-    quietControl.textContent=quiet?"Motion on":"Quiet mode";
+    quietControl.textContent=quiet?"Motion On":"Quiet Mode";
     quietControl.setAttribute("aria-pressed",String(quiet));
   }
   quietControl?.addEventListener("click",()=>{
