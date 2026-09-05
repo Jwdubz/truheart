@@ -101,6 +101,13 @@ img,video{display:block;max-width:100%}
 [data-page="organization"] .scene-end .display{font-size:clamp(75px,9vw,155px)}
 [data-page="organization"] .chapter-opening{height:105svh}
 
+/* Keep the desktop disclosure button fixed while its answer opens below it. */
+@media(orientation:landscape){
+  .has-cinema[data-layout="cinema"] [data-page="candidate"] .scene-practice .detail{position:absolute;top:100%;bottom:auto;left:0;width:min(420px,55vw);max-width:none;margin-top:8px}
+  .has-cinema[data-layout="cinema"] [data-page="candidate"] .scene-practice .detail p{margin-bottom:0}
+  .has-cinema[data-layout="cinema"] [data-page="candidate"] .scene-practice .scene-next:focus-visible{top:120px;bottom:auto}
+}
+
 @media(max-width:900px){
   .mast{padding:16px 24px}
   .brand{width:50px}
