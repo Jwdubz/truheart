@@ -1,7 +1,7 @@
 @font-face{font-family:Anton;src:url("assets/fonts/anton.woff2") format("woff2");font-style:normal;font-weight:400;font-display:swap}
 @font-face{font-family:Epilogue;src:url("assets/fonts/epilogue-400.woff2") format("woff2");font-style:normal;font-weight:400;font-display:swap}
 @font-face{font-family:Epilogue;src:url("assets/fonts/epilogue-700.woff2") format("woff2");font-style:normal;font-weight:700;font-display:swap}
-:root{--ink:#080909;--paper:#f5efe5;--muted:#c7c2b8;--gold:#cfad72;--gutter:clamp(24px,5vw,88px)}
+:root{--ink:#080909;--paper:#f5efe5;--muted:#c7c2b8;--gold:#cfad72;--gold-text:#e7ba62;--gutter:clamp(24px,5vw,88px)}
 *{box-sizing:border-box}
 /* Owner rule: plain letterforms, no strokes or shadow-based halos. See AGENTS.md. */
 *,*::before,*::after{text-shadow:none;-webkit-text-stroke-width:0}
@@ -30,6 +30,8 @@ img,video{display:block;max-width:100%}
 .scene{padding:120px var(--gutter) 80px}
 .display{font-family:Anton,Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(68px,9vw,160px);line-height:.95;letter-spacing:-.01em;margin:0}
 .display span{display:block}
+/* Gold carries the key thought; body copy and controls retain their ivory. */
+.word-gold,.service-label,.founder-signature{color:var(--gold-text)}
 .scene p{margin:0 0 1em}
 .scene-copy{max-width:350px}
 .scene-copy p{font-size:clamp(18px,1.6vw,23px);line-height:1.5}
