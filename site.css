@@ -67,6 +67,9 @@ ol, ul { padding: 0; list-style: none; }
 }
 .two .dim { color: var(--dim-paper); }
 .two-dark .dim { color: var(--dim-black); }
+
+/* For Brands: explicit mobile line stack; desktop still flows inline. */
+.h-brands .brands-line { display: inline; }
 .h3 { font-family: var(--display); font-weight: 700; font-size: 2.1rem; line-height: 1; text-transform: uppercase; }
 
 /* ---------- pills (text roll on hover) ---------- */
@@ -364,6 +367,9 @@ html.motion-off .motion-toggle { background: var(--paper); color: var(--ink); bo
   .film { margin-top: 2.2rem; }
   .intro { display: block; padding: 5rem var(--g) 3.75rem; }
   .h2 { font-size: min(3.1rem, 9.4vw); }
+  /* Lock Jarrett's 8-line For Brands stack; size so longest line fits gutters. */
+  .h2.h-brands { font-size: min(3.1rem, 8.3vw); }
+  .h-brands .brands-line { display: block; white-space: nowrap; }
   .intro-body { grid-template-columns: 1fr; }
   .stats { margin-top: 2.75rem; }
   .stat { padding: 1.2rem 0 1.1rem; }
@@ -401,6 +407,7 @@ html.motion-off .motion-toggle { background: var(--paper); color: var(--ink); bo
 /* Narrow phones: keep the longest word (TELECOMMUNICATIONS) clear of the gutters. */
 @media (max-width: 400px) {
   .h2 { font-size: 8.6vw; }
+  .h2.h-brands { font-size: 8.3vw; }
 }
 /* Without motion: the ticker is a static, wrapping list; nothing clipped. */
 html:not(.m) .tick { -webkit-mask-image: none; mask-image: none; }
