@@ -42,6 +42,24 @@
     addEventListener(ev, playAll, { passive: true, once: true });
   });
 
+  /* Phones/tablets: hide the floating Pause/Play while no film or ticker is on screen so it never sits
+     on cards, form fields or the footer. CSS applies .mt-away only under 1000px; desktop is unchanged. */
+  (function () {
+    var btn = document.getElementById('motion-toggle');
+    if (!btn || !('IntersectionObserver' in window)) return;
+    var watched = vids.slice();
+    var util = document.querySelector('.util');
+    if (util) watched.push(util);
+    var seen = new Map();
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { seen.set(en.target, en.isIntersecting); });
+      var any = false;
+      seen.forEach(function (on) { if (on) any = true; });
+      btn.classList.toggle('mt-away', !any);
+    }, { rootMargin: '20% 0px 20% 0px', threshold: 0 });
+    watched.forEach(function (el) { io.observe(el); });
+  })();
+
   if (!d.classList.contains('m') || !window.gsap || !window.ScrollTrigger || !window.SplitText) {
     d.classList.remove('m');
     return;
