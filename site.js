@@ -1,257 +1,195 @@
-(() => {
-  "use strict";
-  const root = document.documentElement;
-  const chapters = [...document.querySelectorAll("[data-chapter]")];
-  const worlds = [...document.querySelectorAll("[data-world]")];
-  const portrait = matchMedia("(orientation: portrait)");
-  const compact = matchMedia("(max-width:359px), (max-height:650px)");
-  const mobileNav = matchMedia("(max-width:900px)");
-  const playbackKey = "truheart-playback";
-  function storedPlayback() {
-    try { const value=JSON.parse(sessionStorage.getItem(playbackKey) || "{}");return value&&typeof value==="object"?value:{}; }
-    catch { return {}; }
-  }
-  const saved = storedPlayback();
-  const quietControl = document.querySelector("[data-quiet]");
-  const requestedMotion = new URLSearchParams(location.search).get("motion");
-  const explicitQuiet = ["quiet", "off"].includes(requestedMotion);
-  let quiet = explicitQuiet || saved.quiet === true;
-  const control = document.querySelector("[data-film-btn]");
-  const filmControls = document.querySelector(".film-controls");
-  const main = document.querySelector("main");
-  const mast = document.querySelector("[data-mast]");
-  const menu = document.querySelector("[data-menu]");
-  const nav = document.querySelector("#site-nav");
-  const clipState = new WeakMap();
-  const clamp = x => Math.min(1, Math.max(0, x));
-  const ease = x => {x=clamp(x);return x*x*(3-2*x);};
-  let active = -1, userPaused = explicitQuiet || saved.paused === true || quiet, tick = 0;
-  let pendingFocus = null;
-  let layout = [];
-  root.classList.add("has-cinema");
-  root.dataset.motion = quiet ? "quiet" : "full";
-  function rememberPlayback() {
-    try { sessionStorage.setItem(playbackKey, JSON.stringify({paused:userPaused, quiet})); }
-    catch { /* The controls still work when session storage is unavailable. */ }
-  }
-  if (explicitQuiet) rememberPlayback();
-  function pauseAll() { for (const world of worlds) world.querySelector("video").pause(); }
+/* Tru Heart Consulting — motion + form. GSAP 3.13 (ScrollTrigger, SplitText) + Lenis 1.3, vendored.
+   Motion is mandatory. Start states live under html.m (set in the head). If JS or the libraries
+   fail, .m is removed and every element shows its final state. One pause control covers WCAG 2.2.2. */
+(function () {
+  var d = document.documentElement;
+  var motionOn = true;
+  var vids = Array.prototype.slice.call(document.querySelectorAll('video'));
+  var lenis = null;
+  var TAU = 0.41;   /* Lenis smoothing time constant (s). lerp = 1/(60*tau). */
 
-  const stateFor = video => {
-    if (!clipState.has(video)) clipState.set(video,{failed:false,loaded:false,ended:false,token:0,timer:0});
-    return clipState.get(video);
-  };
-  const videoFor = index => worlds[index]?.querySelector("video");
-  const choose = video => ({
-    source:portrait.matches?video.dataset.portrait:video.dataset.landscape,
-    poster:portrait.matches?video.dataset.posterPortrait:video.dataset.posterLandscape
+  /* Brand inquiry: no backend, so build a prefilled email. Nothing is sent automatically. */
+  var form = document.getElementById('inquiry');
+  if (form) form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+    var v = function (id) { return document.getElementById(id).value.trim(); };
+    var company = v('f-company');
+    var body = ['Name: ' + v('f-name'), 'Company: ' + company, 'Work email: ' + v('f-email'), 'Phone: ' + v('f-phone'), '', 'What are you launching?', v('f-launch')].join('\r\n');
+    window.location.href = 'mailto:careers@truheartconsultinginc.com?subject=' + encodeURIComponent('Brand inquiry — ' + company) + '&body=' + encodeURIComponent(body);
   });
-  function syncControl() {
-    const video = videoFor(active);
-    if (!video || !control) return;
-    const state = stateFor(video);
-    control.hidden = false;
-    const end = video.ended || state.ended;
-    control.textContent = state.failed ? "Play" : end ? "Replay" : video.paused ? "Play" : "Pause";
-    control.dataset.state = end ? "ended" : video.paused ? "paused" : "playing";
-    control.setAttribute("aria-label",control.textContent+" Films");
+
+  /* Film: autoplay muted loop. Explicit play() + retries. Honors the motion pause toggle. */
+  function play(v) {
+    if (!motionOn) return;
+    v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+    if (!v.paused) return;
+    var p = v.play();
+    if (p && p.catch) p.catch(function () {});
   }
-  function loadVideo(video, carry=0) {
-    const state=stateFor(video);
-    const selected=choose(video);
-    video.poster=selected.poster;
-    video.muted=true;
-    if (video.getAttribute("src")===selected.source) return;
-    state.token++;
-    const token=state.token;
-    video.src=selected.source;
-    video.preload="metadata";
-    state.loaded=true;
-    state.failed=false;
-    video.load();
-    video.addEventListener("loadedmetadata",()=>{
-      if(token!==state.token)return;
-      if(carry>0 && Number.isFinite(video.duration))video.currentTime=Math.min(carry,video.duration);
-    },{once:true});
-  }
-  function play(video) {
-    if(!video || userPaused || document.hidden)return;
-    const state=stateFor(video);
-    if(state.ended || video.ended){syncControl();return;}
-    loadVideo(video);
-    clearTimeout(state.timer);
-    state.timer=setTimeout(()=>{
-      if(video===videoFor(active)&&video.readyState<2){state.failed=true;video.pause();syncControl();}
-    },6000);
-    video.play().then(()=>{
-      clearTimeout(state.timer);state.failed=false;
-      if(video!==videoFor(active)||userPaused||document.hidden)video.pause();
-      syncControl();
-    }).catch(()=>{clearTimeout(state.timer);state.failed=true;syncControl();});
-  }
-  for(const world of worlds) {
-    const video=world.querySelector("video");
-    video.loop=!world.hasAttribute("data-frozen");
-    const state=stateFor(video);
-    video.poster=choose(video).poster;
-    video.addEventListener("ended",()=>{
-      state.ended=true;
-      if(world.dataset.world==="opening")root.classList.add("opening-complete");
-      if(video===videoFor(active))syncControl();
+  function playAll() { if (!motionOn) return; vids.forEach(play); }
+  function pauseVids() { vids.forEach(function (v) { v.pause(); }); }
+  vids.forEach(function (v) {
+    ['loadeddata', 'canplay', 'stalled'].forEach(function (ev) {
+      v.addEventListener(ev, function () { if (!document.hidden) play(v); });
     });
-    video.addEventListener("play",()=>video===videoFor(active)&&syncControl());
-    video.addEventListener("pause",()=>video===videoFor(active)&&syncControl());
-    video.addEventListener("error",()=>{state.failed=true;if(video===videoFor(active))syncControl();});
+  });
+  playAll();
+  if (document.readyState !== 'complete') addEventListener('load', playAll);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) playAll(); });
+  ['pointerdown', 'touchstart', 'keydown', 'scroll', 'wheel'].forEach(function (ev) {
+    addEventListener(ev, playAll, { passive: true, once: true });
+  });
+
+  if (!d.classList.contains('m') || !window.gsap || !window.ScrollTrigger || !window.SplitText) {
+    d.classList.remove('m');
+    return;
   }
-  function activate(index) {
-    if(index===active)return;
-    const old=videoFor(active);
-    if(old)old.pause();
-    active=index;
-    const current=videoFor(active);
-    if(current){loadVideo(current);play(current);}
-    syncControl();
-  }
-  function measure() {
-    root.dataset.layout=compact.matches?"flow":"cinema";
-    if(!mobileNav.matches&&mast.classList.contains("is-open"))closeMenu(false);
-    nav.inert=mobileNav.matches&&!mast.classList.contains("is-open");
-    layout=chapters.map(chapter=>({start:chapter.offsetTop,end:chapter.offsetTop+chapter.offsetHeight}));
-    update();
-  }
-  function update() {
-    tick=0;
-    const y=window.scrollY, height=innerHeight;
-    const flow=compact.matches;
-    const bridge=quiet?Math.max(1,height*.1):height*.34;
-    let strongest=0, maximum=-1;
-    chapters.forEach((chapter,index)=>{
-      const bounds=layout[index];
-      if(!bounds)return;
-      const incoming=index===0?1:ease((y-(bounds.start-bridge))/bridge);
-      const outgoing=index===chapters.length-1?0:ease((y-(bounds.end-bridge))/bridge);
-      const alpha=incoming*(1-outgoing);
-      const textIn=ease((incoming-.65)/.35);
-      const textOut=1-ease(outgoing/.35);
-      const textAlpha=textIn*textOut;
-      const progress=clamp((y-bounds.start)/(bounds.end-bounds.start));
-      const scene=chapter.querySelector(".scene");
-      const frame=worlds[index];
-      // Keep the lower film opaque while the next film fades over it, so the
-      // transition does not mix the black stage into both source images.
-      frame.style.opacity=String(alpha>0?(outgoing>0?1:incoming):0);
-      frame.classList.toggle("is-current",alpha>.002);
-      scene.style.opacity=String(flow?1:textAlpha);
-      scene.style.setProperty("--enter",String(flow?0:1-textIn));
-      scene.classList.toggle("is-active",flow||textAlpha>.01);
-      scene.classList.toggle("is-readable",flow||textAlpha>.6);
-      scene.inert=!flow&&textAlpha<=.6;
-      if(alpha>maximum){maximum=alpha;strongest=index;}
-      if(index>0 && !quiet && !flow){
-        const shift=(progress-.5)*20;
-        scene.style.transform="translate3d(0,"+(-shift)+"px,0)";
-      }else scene.style.transform="none";
+
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+  var E_OUT = 'power3.out', E_INOUT = 'power3.inOut';
+
+  /* Smooth scroll (Lenis) on the GSAP ticker so ScrollTrigger stays in sync. */
+  if (window.Lenis) {
+    lenis = new Lenis({ autoRaf: false, anchors: false, lerp: 1 / (60 * TAU) });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
+    gsap.ticker.lagSmoothing(0);
+    document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var id = a.getAttribute('href');
+        var el = id === '#top' ? 0 : document.querySelector(id);
+        if (el === null) return;
+        e.preventDefault();
+        lenis.scrollTo(el, { duration: 1.2 });
+        if (el && el.focus) { el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: true }); }
+      });
     });
-    activate(strongest);
-    root.dataset.scene=chapters[strongest]?.id||"opening";
-    if(y>50)root.classList.add("opening-complete");
-    if(pendingFocus){
-      const scene=pendingFocus.chapter.querySelector(".scene");
-      if(!scene.inert&&Number(scene.style.opacity)>.99){
-        const target=pendingFocus.element;pendingFocus=null;
-        target.focus({preventScroll:true});
-      }
+  }
+
+  /* WCAG 2.2.2: one control pauses videos, the ticker, Lenis and GSAP loops. */
+  function setMotion(on) {
+    motionOn = on;
+    d.classList.toggle('motion-off', !on);
+    var btn = document.getElementById('motion-toggle');
+    if (btn) {
+      btn.setAttribute('aria-pressed', on ? 'false' : 'true');
+      btn.setAttribute('aria-label', on ? 'Pause motion' : 'Play motion');
+      btn.textContent = on ? 'Pause' : 'Play';
+    }
+    if (on) {
+      gsap.ticker.wake();
+      gsap.globalTimeline.play();
+      if (lenis) lenis.start();
+      playAll();
+    } else {
+      pauseVids();
+      if (lenis) lenis.stop();
+      gsap.globalTimeline.pause();
+      gsap.ticker.sleep();
     }
   }
-  function requestUpdate(){if(!tick)tick=requestAnimationFrame(update);}
-  function closeMenu(restore=false){
-    const opened=mast.classList.contains("is-open");
-    mast.classList.remove("is-open");menu.setAttribute("aria-expanded","false");menu.textContent="Menu";
-    nav.inert=mobileNav.matches;
-    main.inert=false;filmControls.inert=false;filmControls.hidden=false;
-    if(restore&&opened)menu.focus();
+  var toggle = document.getElementById('motion-toggle');
+  if (toggle) toggle.addEventListener('click', function () { setMotion(!motionOn); });
+
+  /* Counters: tween from 0 to the value already in the markup. */
+  function fmt(n, dec, prefix) {
+    return (prefix || '') + n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
   }
-  menu.addEventListener("click",()=>{
-    const open=!mast.classList.contains("is-open");
-    mast.classList.toggle("is-open",open);menu.setAttribute("aria-expanded",String(open));menu.textContent=open?"Close":"Menu";
-    nav.inert=!open&&mobileNav.matches;main.inert=open;filmControls.inert=open;filmControls.hidden=open;
-    if(open)requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      if(mast.classList.contains("is-open"))nav.querySelector("a")?.focus();
-    }));
-  });
-  document.addEventListener("keydown",event=>{
-    if(event.key==="Escape"){closeMenu(true);return;}
-    if(event.key!=="Tab"||!mast.classList.contains("is-open"))return;
-    const items=[...mast.querySelectorAll("a[href],button")];
-    const first=items[0],last=items[items.length-1];
-    if(event.shiftKey&&(document.activeElement===first||!mast.contains(document.activeElement))){event.preventDefault();last.focus();}
-    else if(!event.shiftKey&&(document.activeElement===last||!mast.contains(document.activeElement))){event.preventDefault();first.focus();}
-  });
-  function visitChapter(target,instant=false){
-    const element=target.querySelector("h1,h2")||target;
-    element.setAttribute("tabindex","-1");
-    pendingFocus={chapter:target,element};
-    window.scrollTo({top:target.offsetTop,behavior:quiet||instant?"instant":"smooth"});
-    requestUpdate();
+  function counter(el, delay) {
+    var to = parseFloat(el.dataset.count), dec = parseInt(el.dataset.dec || '0', 10), pre = el.dataset.prefix || '';
+    var o = { v: 0 };
+    el.textContent = fmt(0, dec, pre);
+    return gsap.to(o, { v: to, duration: 1.6, delay: delay || 0, ease: 'power2.out',
+      onUpdate: function () { el.textContent = fmt(dec ? o.v : Math.round(o.v), dec, pre); },
+      onComplete: function () { el.textContent = fmt(to, dec, pre); } });
   }
-  document.addEventListener("click",event=>{
-    const anchor=event.target.closest('a[href^="#"]');
-    if(anchor){
-      const target=document.querySelector(anchor.getAttribute("href"));
-      if(!target)return;
-      event.preventDefault();closeMenu(false);
-      history.pushState(null,"",anchor.getAttribute("href"));
-      visitChapter(target,event.detail===0);
-    }
-    if(event.target.closest("#site-nav a"))closeMenu(false);
-  });
-  control?.addEventListener("click",()=>{
-    const video=videoFor(active),state=stateFor(video);
-    if(state.failed){state.failed=false;state.ended=false;userPaused=false;video.load();play(video);}
-    else if(video.ended||state.ended){state.ended=false;userPaused=false;video.currentTime=0;play(video);}
-    else if(video.paused){userPaused=false;play(video);}
-    else{userPaused=true;pauseAll();}
-    if(!userPaused){quiet=false;root.dataset.motion="full";syncQuiet();requestUpdate();}
-    rememberPlayback();
-    syncControl();
-  });
-  for(const toggle of document.querySelectorAll("[data-details]")){
-    toggle.addEventListener("click",()=>{
-      const detail=document.getElementById(toggle.getAttribute("aria-controls"));
-      const expanded=toggle.getAttribute("aria-expanded")==="true";
-      toggle.setAttribute("aria-expanded",String(!expanded));detail.hidden=expanded;
-      toggle.querySelector("span").textContent=expanded?"+":"−";
-      measure();
+
+  function boot() {
+    var splits = [];
+    document.querySelectorAll('[data-split]').forEach(function (el) {
+      var s = SplitText.create(el, { type: 'lines', mask: 'lines', linesClass: 'split-line', autoSplit: false });
+      s.masks && s.masks.forEach(function (m) { m.classList.add('split-mask'); });
+      gsap.set(s.lines, { yPercent: 105 });
+      el.style.visibility = 'visible';
+      splits.push({ el: el, s: s });
     });
+
+    var hero = splits.filter(function (x) { return x.el.classList.contains('h-hero'); })[0];
+    var heroCount = document.querySelector('.film-cap [data-count]');
+    var intro = gsap.timeline({ paused: true })
+      .to('.hero .eyebrow', { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0)
+      .to(hero ? hero.s.lines : [], { yPercent: 0, duration: 1, ease: E_OUT, stagger: 0.08 }, 0.05)
+      .to('.film-frame', { clipPath: 'inset(0% 0 0 0)', duration: 1.15, ease: E_INOUT }, 0.1)
+      .to('.hero [data-reveal]', { opacity: 1, y: 0, duration: 0.9, ease: E_OUT, stagger: 0.1 }, 0.45)
+      .to('.film-cap', { opacity: 1, duration: 0.6 }, 0.9)
+      .add(function () { if (heroCount) counter(heroCount); }, 0.9);
+
+    splits.forEach(function (x) {
+      if (x === hero) return;
+      gsap.to(x.s.lines, { yPercent: 0, duration: 1, ease: E_OUT, stagger: 0.08,
+        scrollTrigger: { trigger: x.el, start: 'top 94%', once: true } });
+    });
+    gsap.utils.toArray('[data-reveal]').forEach(function (el) {
+      if (el.closest('.hero') || el.matches('.stat, .card, .rep')) return;
+      var nums = el.querySelectorAll('[data-count]');
+      gsap.to(el, { opacity: 1, y: 0, duration: 0.9, ease: E_OUT,
+        scrollTrigger: { trigger: el, start: 'top 88%', once: true,
+          onEnter: function () { nums.forEach(function (n) { counter(n, 0.1); }); } } });
+    });
+    ScrollTrigger.batch('.stat, .card, .rep', { start: 'top 88%', once: true, onEnter: function (b) {
+      gsap.to(b, { opacity: 1, y: 0, duration: 0.9, ease: E_OUT, stagger: 0.1, overwrite: true });
+      b.forEach(function (el, i) { el.querySelectorAll('[data-count]').forEach(function (n) { counter(n, 0.15 + i * 0.1); }); });
+    } });
+
+    gsap.fromTo('.ghost span', { xPercent: 6 }, { xPercent: -34, ease: 'none',
+      scrollTrigger: { trigger: '.ghost', start: 'top bottom', end: 'bottom top', scrub: true } });
+    gsap.to('.hero-text', { yPercent: -8, ease: 'none',
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+
+    if (matchMedia('(pointer: fine)').matches && innerWidth > 991) {
+      d.classList.add('fine');
+      var cur = document.querySelector('.cursor'), ring = cur.querySelector('.cursor-ring'), prog = cur.querySelector('.c-prog');
+      /* Position on the outer node with left/top only. Scale lives on an inner node so grow/shrink can't shove the ring. */
+      var x = innerWidth / 2, y = innerHeight / 2, cx = x, cy = y, sc = 1, scT = 1, C = 125.66;
+      var hoverSel = 'a,button,input,textarea,label,.card,.rep,.pill,.motion-toggle,[role="button"]';
+      function overHot(t) { return !!(t && t.nodeType === 1 && t.closest && t.closest(hoverSel)); }
+      addEventListener('pointermove', function (e) {
+        x = e.clientX; y = e.clientY;
+        scT = overHot(e.target) ? 1.55 : 1;
+      }, { passive: true });
+      addEventListener('pointerleave', function () { scT = 1; }, { passive: true });
+      gsap.ticker.add(function () {
+        /* Stick tight on hot targets so a lagging ring never looks dumped on the film. */
+        var k = scT > 1 ? 0.45 : 0.18;
+        cx += (x - cx) * k; cy += (y - cy) * k;
+        sc += (scT - sc) * 0.22;
+        cur.style.left = cx.toFixed(1) + 'px';
+        cur.style.top = cy.toFixed(1) + 'px';
+        ring.style.transform = 'scale(' + sc.toFixed(3) + ')';
+        var max = document.documentElement.scrollHeight - innerHeight;
+        prog.style.strokeDashoffset = (C * (1 - (max > 0 ? scrollY / max : 0))).toFixed(2);
+      });
+    }
+
+    window.__thReady = true;
+
+    var loader = document.querySelector('.loader');
+    if (d.classList.contains('noload') || !loader) { intro.play(0); return; }
+    var names = loader.querySelectorAll('.loader-list span'), pct = loader.querySelector('.loader-pct'), p = { v: 0 };
+    gsap.set(names, { y: 0, yPercent: 100 });
+    var tl = gsap.timeline({ onComplete: function () { loader.remove(); } });
+    tl.to(p, { v: 100, duration: 1.5, ease: 'power1.inOut', onUpdate: function () { pct.textContent = Math.round(p.v); } }, 0);
+    names.forEach(function (n, i) {
+      tl.to(n, { yPercent: 0, duration: 0.42, ease: E_OUT }, i * 0.5);
+      if (i < names.length - 1) tl.to(n, { yPercent: -100, duration: 0.42, ease: 'power2.in' }, i * 0.5 + 0.38);
+    });
+    tl.to(loader, { clipPath: 'inset(0 0 100% 0)', duration: 0.9, ease: E_INOUT }, 1.6)
+      .add(function () { intro.play(0); }, 1.85);
   }
-  portrait.addEventListener("change",()=>{
-    const video=videoFor(active);
-    if(video){const t=video.currentTime;loadVideo(video,t);if(!userPaused)play(video);}
-    measure();
+
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () {
+    try { boot(); } catch (err) { d.classList.remove('m'); if (window.console) console.error(err); }
   });
-  function syncQuiet(){
-    if(!quietControl)return;
-    quietControl.textContent=quiet?"Motion On":"Quiet Mode";
-    quietControl.setAttribute("aria-pressed",String(quiet));
-  }
-  quietControl?.addEventListener("click",()=>{
-    quiet=!quiet;userPaused=quiet;root.dataset.motion=quiet?"quiet":"full";
-    const video=videoFor(active);
-    if(quiet)pauseAll();else play(video);
-    rememberPlayback();
-    syncQuiet();syncControl();requestUpdate();
-  });
-  syncQuiet();
-  addEventListener("scroll",requestUpdate,{passive:true});
-  addEventListener("resize",measure);
-  document.addEventListener("visibilitychange",()=>{const v=videoFor(active);if(document.hidden)pauseAll();else if(!userPaused)play(v);});
-  addEventListener("pagehide",pauseAll);
-  addEventListener("pageshow",event=>{
-    if(event.persisted){const latest=storedPlayback();quiet=latest.quiet===true;userPaused=latest.paused===true||quiet;root.dataset.motion=quiet?"quiet":"full";syncQuiet();}
-    measure();if(userPaused)pauseAll();else play(videoFor(active));
-  });
-  addEventListener("popstate",()=>{const id=location.hash.slice(1);const target=id?document.getElementById(id):chapters[0];if(target)visitChapter(target,true);});
-  document.fonts.ready.then(measure);
-  measure();
-  if(location.hash){requestAnimationFrame(()=>{const target=document.getElementById(location.hash.slice(1));if(target)scrollTo(0,target.offsetTop);});}
 })();
