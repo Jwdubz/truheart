@@ -111,14 +111,13 @@
   var toggle = document.getElementById('motion-toggle');
   if (toggle) toggle.addEventListener('click', function () { setMotion(!motionOn); });
 
-  /* Counters: tween from 0 to the value already in the markup. */
+  /* Counters: tween up from 60% to the value already in the markup (never flashes $0). */
   function fmt(n, dec, prefix) {
     return (prefix || '') + n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
   }
   function counter(el, delay) {
     var to = parseFloat(el.dataset.count), dec = parseInt(el.dataset.dec || '0', 10), pre = el.dataset.prefix || '';
-    var o = { v: 0 };
-    el.textContent = fmt(0, dec, pre);
+    var o = { v: to * 0.6 };
     return gsap.to(o, { v: to, duration: 1.6, delay: delay || 0, ease: 'power2.out',
       onUpdate: function () { el.textContent = fmt(dec ? o.v : Math.round(o.v), dec, pre); },
       onComplete: function () { el.textContent = fmt(to, dec, pre); } });

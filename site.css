@@ -246,8 +246,8 @@ html.motion-off .tick-track { animation-play-state: paused; }
 }
 .reps .h2 { font-size: 5.6rem; }
 .rep-frame { aspect-ratio: 720 / 996; overflow: hidden; background: var(--ink); }
-.rep-frame video { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s var(--e-out); }
-.rep:hover .rep-frame video { transform: scale(1.03); }   /* card shows the 720×996 source well under 1×: no upscale */
+.rep-frame video, .rep-frame img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s var(--e-out); }
+.rep:hover .rep-frame video, .rep:hover .rep-frame img { transform: scale(1.03); }   /* card shows the 720×996 source well under 1×: no upscale */
 .rep figcaption { border-top-color: var(--line-paper); font-size: 1.3rem; }
 
 /* ---------- ask ---------- */
