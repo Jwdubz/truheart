@@ -106,7 +106,7 @@ if(matchMedia('(hover:none)').matches){var cio2=new IntersectionObserver(functio
   if(paused&&!opened)finish();
   if(t<DRAW&&!opened){var k=t/DRAW;drawTo=Wl*ease(k);head=Wl*.56;yl=H/2;introAmp=1.6;clip(0)}
   else if(t<BEAT0&&!opened){var k2=ease((t-DRAW)/OPEN);clip(k2);yl=H/2;head=Wl*.56;introAmp=1.6}
-  else if(!fdone&&!paused&&!RM){if(!opened)finish();if(!fT&&(hv.currentTime>=STAGE||t>=9))fT=now;fa=fT?Math.max(0,1-(now-fT)/600):1;if(fT&&fa<=0)fdone=1;var bp=((t-BEAT0)%per)/per;head=bp*(Wl+400)-200;yl=H/2;introAmp=1.6}
+  else if(!fdone&&!paused&&!RM){if(!opened)finish();if(!fT&&t>=5)fT=now;fa=fT?Math.max(0,1-(now-fT)/600):1;if(fT&&fa<=0)fdone=1;var bp=((t-BEAT0)%per)/per;head=bp*(Wl+400)-200;yl=H/2;introAmp=1.6}
   else{if(!opened){finish();T0=now-BEAT0*1000;t=BEAT0}
    if(!stT)stT=now;if(!sc0&&scrollY>8)sc0=now;yl=Y;fa=(paused||RM)?1:(sc0?Math.min(1,(now-sc0)/800):0);var dt=Math.min(.05,(now-(window.__lt||now))/1000),rate=1+Math.min(.3,pv*.3);acc+=dt*rate;var bt=acc,ph=(bt%per)/per;steady=true;head=paused?Wl*.6:((acc*Math.max(90,Wl/7))%(Wl+400))-200;env=paused?1:.18+.82*Math.exp(-ph/.16);
    var n=Math.floor(bt/per);if(!paused&&lit<2&&n>=lit&&ph>.35){words[lit]&&words[lit].classList.add('lit');lit++}}
