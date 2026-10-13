@@ -29,7 +29,7 @@ var SH=0;if(window.ResizeObserver)new ResizeObserver(function(){SH=0}).observe(d
 var lenis=null;
 if(false&&window.Lenis){lenis=new Lenis({lerp:.12,wheelMultiplier:.55,touchMultiplier:1,smoothWheel:true});}
 if(window.gsap&&window.ScrollTrigger){
- gsap.registerPlugin(ScrollTrigger);
+ gsap.registerPlugin(ScrollTrigger);ScrollTrigger.config({ignoreMobileResize:true});
  if(lenis){lenis.on('scroll',ScrollTrigger.update);gsap.ticker.add(function(t){lenis.raf(t*1000)});gsap.ticker.lagSmoothing(0)}
  var mm=gsap.matchMedia();
  mm.add('(min-width:901px)',function(){
@@ -47,8 +47,20 @@ if(window.gsap&&window.ScrollTrigger){
  pl.style.strokeDasharray=L;pl.style.strokeDashoffset=L;
  var MX=[270,612,944,1300];pl.style.strokeDasharray='none';pl.style.strokeDashoffset='0';function setP(p){var x=340+(1600-340)*Math.max(0,Math.min(1,p));pl.style.clipPath='inset(-60% '+Math.max(0,100-x/16).toFixed(2)+'% -60% 0)';bl.forEach(function(li,i){li.classList.toggle('on',x>=MX[i]+8)})}setP(0);
  window.__pulseAll=function(){setP(1)};
- mm.add('(min-width:901px)',function(){ScrollTrigger.create({trigger:'.pulse',start:'top top',end:'+=40%',pin:'.pulse-pin',scrub:.15,onUpdate:function(s){if(!paused)setP(s.progress)},onLeave:function(){setP(1)}})});
- mm.add('(max-width:900px)',function(){ScrollTrigger.create({trigger:'.pulse-chart',start:'top 85%',end:'bottom 45%',scrub:.4,onUpdate:function(s){if(!paused)setP(s.progress)},onLeave:function(){setP(1)}})});
+ // r17: the $261K EKG holds the screen. Drawing starts the moment the chart enters view, then the section pins
+ // and scroll scrubs the line to the peak; the last 20% of the runway is a hold on the landed total before release.
+ (function(){var drawP=0,tgt=0,raf=0;function step(){drawP+=(tgt-drawP)*.18;if(Math.abs(tgt-drawP)<.002)drawP=tgt;if(!paused)setP(drawP);raf=drawP!==tgt?requestAnimationFrame(step):0}function go(v){tgt=Math.max(0,Math.min(1,v));if(!raf)raf=requestAnimationFrame(step)}
+ function build(run){var bar=d.querySelector('.bar'),hold=0,landed=0;function killFling(y){if(hold)return;hold=1;root.style.overflow='hidden';scrollTo(0,y);setTimeout(function(){root.style.overflow='';scrollTo(0,y);setTimeout(function(){hold=0},400)},140)}
+  var pinST=ScrollTrigger.create({trigger:'.pulse-pin',start:function(){return 'top '+(bar?bar.offsetHeight:0)+'px'},end:'+='+run+'%',pin:true,pinSpacing:true,anticipatePin:1,
+   // a fast fling would carry straight through the hold; catch it at the pin so the draw always plays
+   onEnter:function(s){landed=0;if(Math.abs(s.getVelocity())>900)killFling(s.start+2)},onEnterBack:function(){landed=1},onLeaveBack:function(){landed=0},
+   // and once more at the landing: a second fling stops on the finished total instead of flying through it
+   onUpdate:function(s){var ly=s.start+(s.end-s.start)*.84;if(!landed&&scrollY>ly&&Math.abs(s.getVelocity())>900){landed=1;killFling(ly)}else if(scrollY>ly)landed=1}});
+  // progress spans: chart enters view (top 92%) -> 80% through the pin. Pre-pin covers about a quarter of the line.
+  var drawST=ScrollTrigger.create({trigger:'.pulse-pin',start:'top 92%',endTrigger:'.pulse-pin',end:function(){return pinST.start+(pinST.end-pinST.start)*.8},onUpdate:function(s){go(.08+s.progress*.92)},onLeaveBack:function(){go(0)},onLeave:function(){go(1)}});
+  return function(){pinST.kill();drawST.kill()}}
+ mm.add('(min-width:901px)',function(){return build(110)});
+ mm.add('(max-width:900px)',function(){return build(140)});})();
  // hero: framed reel grows to full screen
  (function(){var hf=d.querySelector('.hero .hero-film'),small=matchMedia('(max-width:900px)').matches,A=small?[12,6,34,8]:[16,20,22,10];
   function setH(p){p=1;var k=Math.min(1,p/.62);k=1-Math.pow(1-k,3);hf.style.setProperty('--it',(A[0]*(1-k))+'%');hf.style.setProperty('--is',(A[1]*(1-k))+'%');hf.style.setProperty('--ib',(A[2]*(1-k))+'%');hf.style.setProperty('--ir',(A[3]*(1-k))+'px')}
