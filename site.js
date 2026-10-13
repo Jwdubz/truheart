@@ -81,8 +81,8 @@ if(matchMedia('(hover:none)').matches){var cio2=new IntersectionObserver(functio
 (function(){
  var cv=d.getElementById('ekg');if(!cv)return;var cx=cv.getContext('2d'),W,H,Y,dpr=Math.min(2,devicePixelRatio||1),px=-1e4,pv=0,lastX=null,big=0,on=true;
  var hf=d.querySelector('.hero .hero-film'),words=[].slice.call(d.querySelectorAll('.hero .hl .w')),hero=d.querySelector('.hero');
- var stT=0,STAGE=4.75,T0=performance.now(),DRAW=.45,OPEN=.6,BEAT0=DRAW+OPEN,per=1,opened=false,lit=0,acc=0,RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
- hero.classList.add('intro-on');
+ var fT=0,fa=1,fdone=0,sc0=0,stT=0,STAGE=4.75,T0=performance.now(),DRAW=.45,OPEN=.6,BEAT0=DRAW+OPEN,per=1,opened=false,lit=0,acc=0,RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ hero.classList.add('intro-on');addEventListener('scroll',function(){if(!sc0&&fdone&&scrollY>8)sc0=performance.now()},{passive:true});
  var PW=null;function panelW(){if(PW!==null)return PW;if(innerWidth<=900){cv.style.clipPath='none';return PW=W}var r=cv.getBoundingClientRect(),f=hf.getBoundingClientRect(),w=Math.max(0,Math.min(W,f.left-r.left));cv.style.clipPath='inset(0 '+(W-w)+'px 0 0)';return PW=w}
  function size(){PW=null;var r=cv.getBoundingClientRect(),hr=d.querySelector('.hero .hero-type').getBoundingClientRect(),lr=d.querySelector('.hero .lede').getBoundingClientRect(),tk=d.querySelector('.ticker'),tr=tk?tk.getBoundingClientRect():null,f=hf.getBoundingClientRect();W=r.width;H=r.height;var y=Math.max(H*.28,hr.top-r.top-46);if(innerWidth<=900){var tt=tr?tr.top-r.top:H;y=Math.round((lr.bottom-r.top+tt)/2+8)}Y=y;PW=innerWidth<=900?W:Math.max(0,Math.min(W,f.left-r.left));var nw=Math.round(W*dpr),nh=Math.round(H*dpr);if(cv.width!==nw||cv.height!==nh){cv.width=nw;cv.height=nh}cx.setTransform(dpr,0,0,dpr,0,0);cv.style.clipPath=innerWidth<=900?'none':'inset(0 '+(W-PW)+'px 0 0)'}
  size();var rsT;addEventListener('resize',function(){cancelAnimationFrame(rsT);rsT=requestAnimationFrame(size)});addEventListener('load',function(){requestAnimationFrame(size)});if(d.fonts&&d.fonts.ready)d.fonts.ready.then(function(){requestAnimationFrame(size)});
@@ -106,11 +106,11 @@ if(matchMedia('(hover:none)').matches){var cio2=new IntersectionObserver(functio
   if(paused&&!opened)finish();
   if(t<DRAW&&!opened){var k=t/DRAW;drawTo=Wl*ease(k);head=Wl*.56;yl=H/2;introAmp=1.6;clip(0)}
   else if(t<BEAT0&&!opened){var k2=ease((t-DRAW)/OPEN);clip(k2);yl=H/2;head=Wl*.56;introAmp=1.6}
-  else if(!stT&&!paused&&!RM&&t<9&&!(hv.currentTime>=STAGE)){if(!opened)finish();var bp=((t-BEAT0)%per)/per;head=bp*(Wl+400)-200;yl=H/2;introAmp=1.6}
+  else if(!fdone&&!paused&&!RM){if(!opened)finish();if(!fT&&(hv.currentTime>=STAGE||t>=9))fT=now;fa=fT?Math.max(0,1-(now-fT)/600):1;if(fT&&fa<=0)fdone=1;var bp=((t-BEAT0)%per)/per;head=bp*(Wl+400)-200;yl=H/2;introAmp=1.6}
   else{if(!opened){finish();T0=now-BEAT0*1000;t=BEAT0}
-   if(!stT)stT=now;var gk=Math.min(1,(now-stT)/700);yl=gk<1?H/2+(Y-H/2)*ease(gk):Y;var dt=Math.min(.05,(now-(window.__lt||now))/1000),rate=1+Math.min(.3,pv*.3);acc+=dt*rate;var bt=acc,ph=(bt%per)/per;steady=true;head=paused?Wl*.6:((acc*Math.max(90,Wl/7))%(Wl+400))-200;env=paused?1:.18+.82*Math.exp(-ph/.16);
+   if(!stT)stT=now;if(!sc0&&scrollY>8)sc0=now;yl=Y;fa=(paused||RM)?1:(sc0?Math.min(1,(now-sc0)/800):0);var dt=Math.min(.05,(now-(window.__lt||now))/1000),rate=1+Math.min(.3,pv*.3);acc+=dt*rate;var bt=acc,ph=(bt%per)/per;steady=true;head=paused?Wl*.6:((acc*Math.max(90,Wl/7))%(Wl+400))-200;env=paused?1:.18+.82*Math.exp(-ph/.16);
    var n=Math.floor(bt/per);if(!paused&&lit<2&&n>=lit&&ph>.35){words[lit]&&words[lit].classList.add('lit');lit++}}
-  pv*=.94;big*=.97;cx.clearRect(0,0,W,H);
+  pv*=.94;big*=.97;cx.clearRect(0,0,W,H);cx.globalAlpha=fa;
   if(steady){if(!(Wl>2)||!(W>2)||!isFinite(acc)){window.__lt=now;return}var sp=Math.min(240,Math.max(120,Wl/4)),bw2=Math.min(bw,sp*.42),sx=(acc*sp)%Wl,still=paused;
    function yt(tau){var u=(((tau%1)+1)%1-.5)*sp/bw2;return yl+qrs(u)*amp*.9}
    cx.lineWidth=innerWidth<=900?3.5:3;cx.lineJoin='round';cx.lineCap='round';if(innerWidth<=900){cx.shadowColor='rgba(0,0,0,.7)';cx.shadowBlur=6}
