@@ -1070,3 +1070,11 @@ html,body{overflow-x:clip}
  .wpts li:nth-child(4) strong,.wpts li:last-child strong{bottom:30px!important}
  .wpts li:nth-child(7) span.wk{transform:translateX(-50%)!important;top:24px!important}
 }
+/* r19: intro without flicker. Words stay hidden from first paint and rise in once each (no bright-dim-bright
+   keyframe), the film is clipped to the intro band from first paint (no full-frame flash before JS), and the
+   reel plays from load so the walk-up never sits frozen. */
+.hero .hl .w,.hero .hl .w.payoff{opacity:0!important;transform:translateY(.28em)!important;animation:none!important;transition:opacity .6s ease-out,transform .8s cubic-bezier(.2,.7,.2,1)!important}
+.hero .hl .w.lit,.hero .hl .w.payoff.on{opacity:1!important;transform:none!important}
+.paused .hero .hl .w{opacity:1!important;transform:none!important}
+.hero.intro-on .hero-film{clip-path:inset(30% 0 30% 0)}
+@media (prefers-reduced-motion:reduce){.hero .hl .w{transition:none!important}}
