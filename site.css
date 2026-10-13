@@ -1,4 +1,4 @@
-@font-face{font-family:Disp;src:url(fonts/Display.woff2) format('woff2');font-weight:700 900;font-display:swap}
+@font-face{font-family:Disp;src:url(fonts/Display.woff2) format('woff2');font-weight:700 900;font-display:block}
 @font-face{font-family:UI;src:url(fonts/InterTight-400-latin.woff2) format('woff2');font-weight:400;font-display:swap}
 @font-face{font-family:UI;src:url(fonts/InterTight-500-latin.woff2) format('woff2');font-weight:500;font-display:swap}
 @font-face{font-family:UI;src:url(fonts/InterTight-600-latin.woff2) format('woff2');font-weight:600;font-display:swap}
@@ -1078,3 +1078,7 @@ html,body{overflow-x:clip}
 .paused .hero .hl .w{opacity:1!important;transform:none!important}
 .hero.intro-on .hero-film{clip-path:inset(30% 0 30% 0)}
 @media (prefers-reduced-motion:reduce){.hero .hl .w{transition:none!important}}
+
+/* r24: Heart. never clipped on first load */
+.hero .hl{overflow:visible!important;padding-bottom:.1em}
+.hero .hl .w{overflow:visible!important;clip-path:none!important;-webkit-mask:none!important;mask:none!important;white-space:nowrap;line-height:.94}
