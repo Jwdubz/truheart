@@ -2,7 +2,8 @@ if('scrollRestoration' in history)history.scrollRestoration='manual';addEventLis
 (function(){
 var d=document,root=d.documentElement,paused=false;
 var hv=d.getElementById('heroVid'),pay=d.querySelector('.payoff'),PAY=2.59;
-var w2=d.querySelector('.hero .hl .w2'),w2t=0,lq=0;function land(){if(pay.classList.contains('on'))return;if(d.fonts&&d.fonts.status!=='loaded'&&performance.now()<7000){if(!lq){lq=1;d.fonts.ready.then(function(){lq=0;land()})}return}if(!paused&&w2&&!w2.classList.contains('lit')){if(!lq){lq=1;setTimeout(function(){lq=0;land()},200)}return}var now=performance.now();if(!w2t)w2t=now;if(!paused&&now-w2t<650){if(!lq){lq=1;setTimeout(function(){lq=0;land()},650-(now-w2t))}return}if(window.__ekgBig)__ekgBig();pay.classList.add('on')}
+var w2=d.querySelector('.hero .hl .w2'),w2t=0,lq=0,fontOK=!(d.fonts&&d.fonts.load);if(!fontOK){d.fonts.load('700 1em Disp').then(function(){fontOK=1},function(){fontOK=1});setTimeout(function(){fontOK=1},1000)}
+['loadedmetadata','loadeddata','canplay'].forEach(function(e){hv.addEventListener(e,function(){if(!paused&&hv.paused)tryPlay(hv)})});function land(){if(pay.classList.contains('on'))return;if(!fontOK){if(!lq){lq=1;setTimeout(function(){lq=0;land()},120)}return}if(!paused&&w2&&!w2.classList.contains('lit')){if(!lq){lq=1;setTimeout(function(){lq=0;land()},200)}return}var now=performance.now();if(!w2t)w2t=now;if(!paused&&now-w2t<650){if(!lq){lq=1;setTimeout(function(){lq=0;land()},650-(now-w2t))}return}if(window.__ekgBig)__ekgBig();pay.classList.add('on')}
 if(w2&&window.MutationObserver)new MutationObserver(function(){if(!w2t&&w2.classList.contains('lit'))w2t=performance.now()}).observe(w2,{attributes:true,attributeFilter:['class']});
 hv.addEventListener('timeupdate',function(){if(hv.currentTime>=PAY)land()});
 setTimeout(land,Math.max(0,3800-performance.now()));
