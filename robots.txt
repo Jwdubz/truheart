@@ -1,2 +1,10 @@
+# Meta link previews: only the shared page and its thumbnail.
+User-agent: facebookexternalhit
+Disallow: /
+Allow: /$
+Allow: /?
+Allow: /social-preview.jpg$
+Allow: /social-preview.jpg?
+
 User-agent: *
 Disallow: /
