@@ -1082,3 +1082,11 @@ html,body{overflow-x:clip}
 /* r24: Heart. never clipped on first load */
 .hero .hl{overflow:visible!important;padding-bottom:.1em}
 .hero .hl .w{overflow:visible!important;clip-path:none!important;-webkit-mask:none!important;mask:none!important;white-space:nowrap;line-height:.94}
+/* r30: small iPhones - whole headline (incl. red dot) fits above Safari's toolbar on first load (svh, safe-area) */
+@media (max-width:900px){
+ .hero{--hf:min(19vw,104px,12.5svh);--hg:clamp(14px,3.2svh,26px);--hm:calc(28px + env(safe-area-inset-bottom,0px))}
+ .hero .hl{font-size:var(--hf)!important}
+ .hero .hero-film{width:auto!important;max-width:100%!important;height:min(calc(min(100vw,612px)*720/612),calc(100svh - 56px - var(--hg) - var(--hf)*2.05 - var(--hm)))!important;aspect-ratio:612/720!important}
+ .hero .hero-grid{padding-top:var(--hg)!important}
+}
+@media (min-width:640px) and (max-width:900px){.hero .hero-film{height:min(calc(520px*720/612),calc(100svh - 56px - var(--hg) - var(--hf)*2.05 - var(--hm)))!important}}
