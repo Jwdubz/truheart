@@ -1077,7 +1077,7 @@ html,body{overflow-x:clip}
 .hero .hl .w.lit,.hero .hl .w.payoff.on{opacity:1!important;transform:none!important}
 .paused .hero .hl .w{opacity:1!important;transform:none!important}
 .hero.intro-on .hero-film{clip-path:inset(30% 0 30% 0)}
-@media (prefers-reduced-motion:reduce){.hero .hl .w{transition:none!important}}
+
 
 /* r24: Heart. never clipped on first load */
 .hero .hl{overflow:visible!important;padding-bottom:.1em}
