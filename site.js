@@ -81,10 +81,10 @@ if(matchMedia('(hover:none)').matches){var cio2=new IntersectionObserver(functio
 (function(){
  var cv=d.getElementById('ekg');if(!cv)return;var cx=cv.getContext('2d'),W,H,Y,dpr=Math.min(2,devicePixelRatio||1),px=-1e4,pv=0,lastX=null,big=0,on=true;
  var hf=d.querySelector('.hero .hero-film'),words=[].slice.call(d.querySelectorAll('.hero .hl .w')),hero=d.querySelector('.hero');
- var T0=performance.now(),DRAW=.45,OPEN=.6,BEAT0=DRAW+OPEN,opened=false,LW=1.984,acc=LW,HX=0,LB=0;/* motion always plays: ignores prefers-reduced-motion by design. r31: one steady two-beat trace from the first frame; no intro line, no draw-in, no timed fade; the full two-beat trace is there on frame one */
+ var T0=performance.now(),DRAW=.45,OPEN=.6,BEAT0=DRAW+OPEN,opened=false,LW=1.984,acc=LW,HX=0,LB=0,FB=0,HT=0;/* motion always plays: ignores prefers-reduced-motion by design. r31: one steady two-beat trace from the first frame; no intro line, no draw-in, no timed fade; the full two-beat trace is there on frame one */
  hero.classList.add('intro-on');
  var PW=null;function panelW(){if(PW!==null)return PW;if(innerWidth<=900){cv.style.clipPath='none';return PW=W}var r=cv.getBoundingClientRect(),f=hf.getBoundingClientRect(),w=Math.max(0,Math.min(W,f.left-r.left));cv.style.clipPath='inset(0 '+(W-w)+'px 0 0)';return PW=w}
- function size(){PW=null;var r=cv.getBoundingClientRect(),hr=d.querySelector('.hero .hero-type').getBoundingClientRect(),lr=d.querySelector('.hero .lede').getBoundingClientRect(),tk=d.querySelector('.ticker'),tr=tk?tk.getBoundingClientRect():null,f=hf.getBoundingClientRect();W=r.width;var hlr=d.querySelector('.hero .hl').getBoundingClientRect();HX=hlr.left-r.left;LB=lr.bottom-r.top;H=r.height;var y=Math.max(H*.28,hr.top-r.top-46);if(innerWidth<=900){var tt=tr?tr.top-r.top:H;y=Math.round((lr.bottom-r.top+tt)/2+8)}Y=y;PW=innerWidth<=900?W:Math.max(0,Math.min(W,f.left-r.left));var nw=Math.round(W*dpr),nh=Math.round(H*dpr);if(cv.width!==nw||cv.height!==nh){cv.width=nw;cv.height=nh}cx.setTransform(dpr,0,0,dpr,0,0);cv.style.clipPath=innerWidth<=900?'none':'inset(0 '+(W-PW)+'px 0 0)'}
+ function size(){PW=null;var r=cv.getBoundingClientRect(),hr=d.querySelector('.hero .hero-type').getBoundingClientRect(),lr=d.querySelector('.hero .lede').getBoundingClientRect(),tk=d.querySelector('.ticker'),tr=tk?tk.getBoundingClientRect():null,f=hf.getBoundingClientRect();W=r.width;var hlr=d.querySelector('.hero .hl').getBoundingClientRect();HX=hlr.left-r.left;FB=f.bottom-r.top;HT=hlr.top-r.top;LB=lr.bottom-r.top;H=r.height;var y=Math.max(H*.28,hr.top-r.top-46);if(innerWidth<=900){var tt=tr?tr.top-r.top:H;y=Math.round((lr.bottom-r.top+tt)/2+8)}Y=y;PW=innerWidth<=900?W:Math.max(0,Math.min(W,f.left-r.left));var nw=Math.round(W*dpr),nh=Math.round(H*dpr);if(cv.width!==nw||cv.height!==nh){cv.width=nw;cv.height=nh}cx.setTransform(dpr,0,0,dpr,0,0);cv.style.clipPath=innerWidth<=900?'none':'inset(0 '+(W-PW)+'px 0 0)'}
  size();var rsT;addEventListener('resize',function(){cancelAnimationFrame(rsT);rsT=requestAnimationFrame(size)});addEventListener('load',function(){requestAnimationFrame(size)});if(d.fonts&&d.fonts.ready)d.fonts.ready.then(function(){requestAnimationFrame(size)});
  function qrs(u){if(u<-1||u>1)return 0;return u<-.55?-.12*Math.sin((u+1)/.45*Math.PI):u<-.15?0:u<-.05?.25*((u+.15)/.1):u<.05?-1*(1-Math.abs(u)/.05):u<.13?.55*(1-(u-.05)/.08):u<.4?0:-.22*Math.sin((u-.4)/.6*Math.PI)}
  var hs=d.querySelector('.hero-stage');
@@ -108,13 +108,16 @@ if(matchMedia('(hover:none)').matches){var cio2=new IntersectionObserver(functio
   if(!opened){if(t<DRAW)clip(0);else if(t<BEAT0)clip(ease((t-DRAW)/OPEN));else finish()}
   // r32: edge to edge. The trace spans the whole black panel (phone: the whole width), still exactly two beats; spikes keep the r31 size,
   // only the flat baseline between them stretches. Phone/tablet: the spike stays 12px clear of the lede above it. It scrolls at the original pre-r31 drawing speed, clamp(panel/4, 120, 240) px/s.
-  var sh=Math.max(40,((ph0?W*.7:Wl*.58)-(ph0?HX+24:HX+Wl*.12))/2),amp=ph0?Math.max(12,Math.min(sh*.4,(Y-LB-12)/.9)):sh*.4,bw2=amp*1.05,tipX=Math.max(4,Wl-3),VPX=Math.min(240,Math.max(120,Wl/4)),LW0=2,sp=tipX/LW0;LW=2-(.04*bw2+1.5)/sp;sp=tipX/LW;
+  // r33 phone (<640px): the trace sits in the black band between the film and the headline, same spike size, centred in the band;
+  // beats 2.0s apart (scroll = one beat spacing per 2s). Tablet/desktop unchanged.
+  var ph1=innerWidth<640,sh=Math.max(40,((ph0?W*.7:Wl*.58)-(ph0?HX+24:HX+Wl*.12))/2),amp=ph1?Math.max(12,Math.min(sh*.4,(HT-FB-20)/1.395)):ph0?Math.max(12,Math.min(sh*.4,(Y-LB-12)/.9)):sh*.4,bw2=amp*1.05,tipX=Math.max(4,Wl-3),VPX=Math.min(240,Math.max(120,Wl/4)),LW0=2,sp=tipX/LW0;LW=2-(.04*bw2+1.5)/sp;sp=tipX/LW;
+  if(ph1){Y=(FB+HT)/2+.2025*amp;VPX=sp/2}
   var dt=Math.min(.05,(now-(window.__lt||now))/1000),rate=1+Math.min(.3,pv*.3);if(!still)acc+=dt*rate*VPX/sp;if(acc<LW)acc=LW;
   pv*=.94;cx.clearRect(0,0,W,H);cx.globalAlpha=1;
   if(!(Wl>2)||!(W>2)||!isFinite(acc)||!isFinite(Y)){window.__lt=now;return}
   // a live monitor strip above the headline: the tip stays at the panel edge, the trace scrolls left under it. The window is
   // just under two beat spacings, so the old spike leaves the left edge as the new one rises at the tip = exactly two beats.
-  var REV=LW,yl=Y;cx.save();cx.beginPath();cx.rect(0,0,Wl,H);cx.clip();
+  var REV=LW,yl=Y,CT=ph1?Math.max(0,FB):0;cx.save();cx.beginPath();cx.rect(0,CT,Wl,H-CT);cx.clip();
   function yt(tau){var u=(((tau%1)+1)%1-.5)*sp/bw2;return yl+qrs(u)*amp*.9}
   cx.lineWidth=ph0?3.5:3;cx.lineJoin='round';cx.lineCap='round';if(ph0){cx.shadowColor='rgba(0,0,0,.7)';cx.shadowBlur=6}
   var T1=acc,T0s=acc-REV,N=Math.max(1,Math.ceil(REV*sp)),ts=[],KU=[-.15,-.05,0,.05,.13];

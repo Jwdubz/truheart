@@ -1090,3 +1090,5 @@ html,body{overflow-x:clip}
  .hero .hero-grid{padding-top:var(--hg)!important}
 }
 @media (min-width:640px) and (max-width:900px){.hero .hero-film{height:min(calc(520px*720/612),calc(100svh - 56px - var(--hg) - var(--hf)*2.05 - var(--hm)))!important}}
+/* r33: phone - the heartbeat sits in the black band directly above the headline; band sized to the full trace */
+@media (max-width:639px){.hero{--hg:calc(19.5vw + 12px)}}
