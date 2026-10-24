@@ -25,10 +25,12 @@
 <meta name="theme-color" content="#0b0b0b">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%228%22 cy=%228%22 r=%226%22 fill=%22%23cf2d20%22/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/Display.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="site.css?v=84">
+<link rel="stylesheet" href="site.css?v=85">
+<link rel="preload" href="site.js?v=85" as="script">
 <script>document.documentElement.classList.add('js');if('scrollRestoration' in history)history.scrollRestoration='manual';if(!location.hash)window.scrollTo(0,0)</script>
 </head>
 <body>
+<div id="ld" aria-hidden="true"><p class="ld-t"><span class="ld-a">Start With</span><span class="ld-b">Heart</span></p></div>
 <div class="bg" aria-hidden="true"></div>
 <svg class="spine" id="spine" viewBox="0 0 24 1000" preserveAspectRatio="none" aria-hidden="true"><path class="spine-b" d=""/><path class="spine-p" d=""/><path class="spine-k" d="M12 0L12 4 4 9 21 16 3 24 15 29 12 34"/></svg>
 
@@ -216,7 +218,19 @@
 
 <script src="vendor/gsap.min.js"></script>
 <script src="vendor/ScrollTrigger.min.js"></script>
-<script src="site.js?v=84"></script>
+<script>
+// r35: full loading page. START WITH, then HEART in red; it leaves once the film can play (max 4s), then site.js runs so the hero intro starts from its first frame.
+(function(){var d=document,R=d.documentElement,ld=d.getElementById('ld'),hv=d.getElementById('heroVid'),hero=d.querySelector('.hero'),hf=d.querySelector('.hero .hero-film'),T=performance.now(),L=window.__ld={T:T,go:null,out:null,gone:null};
+ R.classList.add('ld-on');try{hv.pause()}catch(e){}
+ function now(){return performance.now()-T}
+ function go(){if(L.go!==null)return;L.go=now();ld.classList.add('go')}
+ if(d.fonts&&d.fonts.load){d.fonts.load('700 1em Disp').then(go,go);setTimeout(go,600)}else go();
+ function tick(){var t=now();if((L.go!==null&&t-L.go>=1500&&hv.readyState>=3)||t>=4000)out();else setTimeout(tick,50)}
+ function out(){L.out=now();hero.classList.add('intro-on');hf.style.clipPath='inset(30% 0 30% 0)';ld.classList.add('out');var done=0;
+  function fin(){if(done)return;done=1;ld.parentNode.removeChild(ld);R.classList.remove('ld-on');try{hv.currentTime=0}catch(e){}L.gone=now();var s=d.createElement('script');s.src='site.js?v=85';d.body.appendChild(s)}
+  ld.addEventListener('transitionend',fin);setTimeout(fin,420)}
+ tick();})();
+</script>
 <!-- jw-book:start -->
 <style>
 .jw-book{position:relative;z-index:50;clear:both;display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px 20px calc(44px + env(safe-area-inset-bottom));background:#0b0b0b;text-align:center;font-family:inherit;margin:0}

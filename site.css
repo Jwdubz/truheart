@@ -1078,3 +1078,14 @@ html,body{overflow-x:clip}
  .hero .hero-grid{padding-top:var(--hg)!important}
 }
 @media (min-width:640px) and (max-width:900px){.hero .hero-film{height:min(calc(520px*720/612),calc(100svh - 56px - var(--hg) - var(--hf)*2.05 - var(--hm)))!important}}
+/* r35: full loading page - START WITH, then HEART in red */
+#ld{position:fixed;inset:0;z-index:2147483000;background:#050505;display:flex;align-items:center;justify-content:center;transition:opacity .35s cubic-bezier(.22,1,.36,1)}
+#ld.out{opacity:0}
+html.ld-on,html.ld-on body{overflow:hidden}
+.ld-t{margin:0;font-family:Disp;font-weight:700;text-transform:uppercase;letter-spacing:-.005em;line-height:.86;font-size:min(10.4vw,20vh,210px);font-size:min(10.4vw,20svh,210px);color:#fff;text-align:center;display:flex;flex-direction:column;align-items:center}
+.ld-t span{display:block;opacity:0}.ld-t .ld-b{color:var(--red)}
+#ld.go .ld-a{animation:ldA .3s ease-out both}
+#ld.go .ld-b{animation:ldB .45s cubic-bezier(.22,1,.36,1) .6s both}
+@keyframes ldA{from{opacity:0}to{opacity:1}}
+@keyframes ldB{from{opacity:0;transform:translateY(.06em)}to{opacity:1;transform:none}}
+@media (max-width:900px){.ld-t{font-size:min(19vw,14vh,150px);font-size:min(19vw,14svh,150px)}}
