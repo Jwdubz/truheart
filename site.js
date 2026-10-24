@@ -81,10 +81,10 @@ if(matchMedia('(hover:none)').matches){var cio2=new IntersectionObserver(functio
 (function(){
  var cv=d.getElementById('ekg');if(!cv)return;var cx=cv.getContext('2d'),W,H,Y,dpr=Math.min(2,devicePixelRatio||1),px=-1e4,pv=0,lastX=null,big=0,on=true;
  var hf=d.querySelector('.hero .hero-film'),words=[].slice.call(d.querySelectorAll('.hero .hl .w')),hero=d.querySelector('.hero');
- var T0=performance.now(),DRAW=.45,OPEN=.6,BEAT0=DRAW+OPEN,opened=false,LW=1.984,acc=LW,HX=0;/* motion always plays: ignores prefers-reduced-motion by design. r31: one steady two-beat trace from the first frame; no intro line, no draw-in, no timed fade; the full two-beat trace is there on frame one */
+ var T0=performance.now(),DRAW=.45,OPEN=.6,BEAT0=DRAW+OPEN,opened=false,LW=1.984,acc=LW,HX=0,LB=0;/* motion always plays: ignores prefers-reduced-motion by design. r31: one steady two-beat trace from the first frame; no intro line, no draw-in, no timed fade; the full two-beat trace is there on frame one */
  hero.classList.add('intro-on');
  var PW=null;function panelW(){if(PW!==null)return PW;if(innerWidth<=900){cv.style.clipPath='none';return PW=W}var r=cv.getBoundingClientRect(),f=hf.getBoundingClientRect(),w=Math.max(0,Math.min(W,f.left-r.left));cv.style.clipPath='inset(0 '+(W-w)+'px 0 0)';return PW=w}
- function size(){PW=null;var r=cv.getBoundingClientRect(),hr=d.querySelector('.hero .hero-type').getBoundingClientRect(),lr=d.querySelector('.hero .lede').getBoundingClientRect(),tk=d.querySelector('.ticker'),tr=tk?tk.getBoundingClientRect():null,f=hf.getBoundingClientRect();W=r.width;var hlr=d.querySelector('.hero .hl').getBoundingClientRect();HX=hlr.left-r.left;H=r.height;var y=Math.max(H*.28,hr.top-r.top-46);if(innerWidth<=900){var tt=tr?tr.top-r.top:H;y=Math.round((lr.bottom-r.top+tt)/2+8)}Y=y;PW=innerWidth<=900?W:Math.max(0,Math.min(W,f.left-r.left));var nw=Math.round(W*dpr),nh=Math.round(H*dpr);if(cv.width!==nw||cv.height!==nh){cv.width=nw;cv.height=nh}cx.setTransform(dpr,0,0,dpr,0,0);cv.style.clipPath=innerWidth<=900?'none':'inset(0 '+(W-PW)+'px 0 0)'}
+ function size(){PW=null;var r=cv.getBoundingClientRect(),hr=d.querySelector('.hero .hero-type').getBoundingClientRect(),lr=d.querySelector('.hero .lede').getBoundingClientRect(),tk=d.querySelector('.ticker'),tr=tk?tk.getBoundingClientRect():null,f=hf.getBoundingClientRect();W=r.width;var hlr=d.querySelector('.hero .hl').getBoundingClientRect();HX=hlr.left-r.left;LB=lr.bottom-r.top;H=r.height;var y=Math.max(H*.28,hr.top-r.top-46);if(innerWidth<=900){var tt=tr?tr.top-r.top:H;y=Math.round((lr.bottom-r.top+tt)/2+8)}Y=y;PW=innerWidth<=900?W:Math.max(0,Math.min(W,f.left-r.left));var nw=Math.round(W*dpr),nh=Math.round(H*dpr);if(cv.width!==nw||cv.height!==nh){cv.width=nw;cv.height=nh}cx.setTransform(dpr,0,0,dpr,0,0);cv.style.clipPath=innerWidth<=900?'none':'inset(0 '+(W-PW)+'px 0 0)'}
  size();var rsT;addEventListener('resize',function(){cancelAnimationFrame(rsT);rsT=requestAnimationFrame(size)});addEventListener('load',function(){requestAnimationFrame(size)});if(d.fonts&&d.fonts.ready)d.fonts.ready.then(function(){requestAnimationFrame(size)});
  function qrs(u){if(u<-1||u>1)return 0;return u<-.55?-.12*Math.sin((u+1)/.45*Math.PI):u<-.15?0:u<-.05?.25*((u+.15)/.1):u<.05?-1*(1-Math.abs(u)/.05):u<.13?.55*(1-(u-.05)/.08):u<.4?0:-.22*Math.sin((u-.4)/.6*Math.PI)}
  var hs=d.querySelector('.hero-stage');
@@ -106,13 +106,15 @@ if(matchMedia('(hover:none)').matches){var cio2=new IntersectionObserver(functio
   if(paused&&!opened)finish();
   // the film still opens out of black exactly as before; the trace is independent of it
   if(!opened){if(t<DRAW)clip(0);else if(t<BEAT0)clip(ease((t-DRAW)/OPEN));else finish()}
-  var dt=Math.min(.05,(now-(window.__lt||now))/1000),rate=1+Math.min(.3,pv*.3);if(!still)acc+=dt*rate;
+  // r32: edge to edge. The trace spans the whole black panel (phone: the whole width), still exactly two beats; spikes keep the r31 size,
+  // only the flat baseline between them stretches. Phone/tablet: the spike stays 12px clear of the lede above it. It scrolls at the original pre-r31 drawing speed, clamp(panel/4, 120, 240) px/s.
+  var sh=Math.max(40,((ph0?W*.7:Wl*.58)-(ph0?HX+24:HX+Wl*.12))/2),amp=ph0?Math.max(12,Math.min(sh*.4,(Y-LB-12)/.9)):sh*.4,bw2=amp*1.05,tipX=Math.max(4,Wl-3),VPX=Math.min(240,Math.max(120,Wl/4)),LW0=2,sp=tipX/LW0;LW=2-(.04*bw2+1.5)/sp;sp=tipX/LW;
+  var dt=Math.min(.05,(now-(window.__lt||now))/1000),rate=1+Math.min(.3,pv*.3);if(!still)acc+=dt*rate*VPX/sp;if(acc<LW)acc=LW;
   pv*=.94;cx.clearRect(0,0,W,H);cx.globalAlpha=1;
   if(!(Wl>2)||!(W>2)||!isFinite(acc)||!isFinite(Y)){window.__lt=now;return}
-  // r31: a live monitor strip in a fixed window above the headline. The tip stays put, the trace scrolls left under it,
-  // a two-beat window (1.984s, so the old spike leaves as the new one rises) = exactly two beats on screen, one beat per second. Window: desktop from headline left + 12% of the
-  // black panel to 58% of the panel (never near the film edge); phone from headline left + 24px to 70% of the width.
-  var x0=ph0?HX+24:HX+Wl*.12,x1=ph0?W*.7:Wl*.58,sp=Math.max(40,(x1-x0)/2),amp=sp*.4,bw2=sp*.42,REV=Math.min(acc,LW),tipX=x0+REV*sp,yl=Y;
+  // a live monitor strip above the headline: the tip stays at the panel edge, the trace scrolls left under it. The window is
+  // just under two beat spacings, so the old spike leaves the left edge as the new one rises at the tip = exactly two beats.
+  var REV=LW,yl=Y;cx.save();cx.beginPath();cx.rect(0,0,Wl,H);cx.clip();
   function yt(tau){var u=(((tau%1)+1)%1-.5)*sp/bw2;return yl+qrs(u)*amp*.9}
   cx.lineWidth=ph0?3.5:3;cx.lineJoin='round';cx.lineCap='round';if(ph0){cx.shadowColor='rgba(0,0,0,.7)';cx.shadowBlur=6}
   var T1=acc,T0s=acc-REV,N=Math.max(1,Math.ceil(REV*sp)),ts=[],KU=[-.15,-.05,0,.05,.13];
@@ -122,8 +124,8 @@ if(matchMedia('(hover:none)').matches){var cio2=new IntersectionObserver(functio
    var tk=ts[k],age=(T1-tk)/LW,fin=1;cx.strokeStyle='rgba(207,45,32,'+((1-.72*age)*fin).toFixed(3)+')';cx.stroke()}
   cx.shadowBlur=0;if(!ph0){cx.fillStyle='#cf2d20';cx.fillRect(Wl-2,yl-9,2,18)}
   var gy=yt(acc);if(!still&&isFinite(gy)){var gr=cx.createRadialGradient(tipX,gy,0,tipX,gy,14);gr.addColorStop(0,'rgba(255,190,170,.95)');gr.addColorStop(.35,'rgba(255,80,60,.6)');gr.addColorStop(1,'rgba(207,45,32,0)');cx.fillStyle=gr;cx.beginPath();cx.arc(tipX,gy,14,0,7);cx.fill();cx.fillStyle='#fff3ee';cx.beginPath();cx.arc(tipX,gy,3,0,7);cx.fill()}
-  var spikes=[];for(var m=Math.ceil(T0s-.5);m+.5<=T1;m++){if(m+.5>=T0s)spikes.push(Math.round(tipX-(T1-m-.5)*sp))}
-  window.__ekgState={tipX:tipX,tailX:tipX-REV*sp,beats:spikes.length,spikes:spikes,right:tipX+14,panel:Wl,Y:yl,top:yl-amp*.9,sp:sp,acc:acc,full:REV>=LW};
+  cx.restore();var spikes=[];for(var m=Math.ceil(T0s-.5);m+.5<=T1;m++){if(m+.5>=T0s)spikes.push(Math.round(tipX-(T1-m-.5)*sp))}
+  window.__ekgState={tipX:tipX,tailX:tipX-REV*sp,beats:spikes.length,spikes:spikes,right:tipX+14,panel:Wl,Y:yl,top:yl-amp*.9,sp:sp,pxps:VPX,period:sp/VPX,acc:acc,full:REV>=LW};
   window.__lt=now;
  }
  requestAnimationFrame(frame);
