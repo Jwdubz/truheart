@@ -1,4 +1,4 @@
-@font-face{font-family:Disp;src:url(fonts/Display.woff2) format('woff2');font-weight:700 900;font-display:block}
+@font-face{font-family:Disp;src:url(fonts/Display.woff2) format('woff2');font-weight:700 900;font-display:swap}
 @font-face{font-family:UI;src:url(fonts/InterTight-400-latin.woff2) format('woff2');font-weight:400;font-display:swap}
 @font-face{font-family:UI;src:url(fonts/InterTight-500-latin.woff2) format('woff2');font-weight:500;font-display:swap}
 @font-face{font-family:UI;src:url(fonts/InterTight-600-latin.woff2) format('woff2');font-weight:600;font-display:swap}
@@ -1070,18 +1070,6 @@ html,body{overflow-x:clip}
  .wpts li:nth-child(4) strong,.wpts li:last-child strong{bottom:30px!important}
  .wpts li:nth-child(7) span.wk{transform:translateX(-50%)!important;top:24px!important}
 }
-/* r19: intro without flicker. Words stay hidden from first paint and rise in once each (no bright-dim-bright
-   keyframe), the film is clipped to the intro band from first paint (no full-frame flash before JS), and the
-   reel plays from load so the walk-up never sits frozen. */
-.hero .hl .w,.hero .hl .w.payoff{opacity:0!important;transform:translateY(.28em)!important;animation:none!important;transition:opacity .6s ease-out,transform .8s cubic-bezier(.2,.7,.2,1)!important}
-.hero .hl .w.lit,.hero .hl .w.payoff.on{opacity:1!important;transform:none!important}
-.paused .hero .hl .w{opacity:1!important;transform:none!important}
-.hero.intro-on .hero-film{clip-path:inset(30% 0 30% 0)}
-
-
-/* r24: Heart. never clipped on first load */
-.hero .hl{overflow:visible!important;padding-bottom:.1em}
-.hero .hl .w{overflow:visible!important;clip-path:none!important;-webkit-mask:none!important;mask:none!important;white-space:nowrap;line-height:.94}
 /* r30: small iPhones - whole headline (incl. red dot) fits above Safari's toolbar on first load (svh, safe-area) */
 @media (max-width:900px){
  .hero{--hf:min(19vw,104px,12.5svh);--hg:clamp(14px,3.2svh,26px);--hm:calc(28px + env(safe-area-inset-bottom,0px))}
@@ -1090,5 +1078,3 @@ html,body{overflow-x:clip}
  .hero .hero-grid{padding-top:var(--hg)!important}
 }
 @media (min-width:640px) and (max-width:900px){.hero .hero-film{height:min(calc(520px*720/612),calc(100svh - 56px - var(--hg) - var(--hf)*2.05 - var(--hm)))!important}}
-/* r33: phone - the heartbeat sits in the black band directly above the headline; band sized to the full trace */
-@media (max-width:639px){.hero{--hg:calc(19.5vw + 12px)}}

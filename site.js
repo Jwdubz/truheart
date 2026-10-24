@@ -1,15 +1,13 @@
 if('scrollRestoration' in history)history.scrollRestoration='manual';addEventListener('pageshow',function(){if(!location.hash)scrollTo(0,0)});
 (function(){
 var d=document,root=d.documentElement,paused=false;
-var hv=d.getElementById('heroVid'),pay=d.querySelector('.payoff'),PAY=2.59;
-var w2=d.querySelector('.hero .hl .w2'),w2t=0,lq=0,fontOK=!(d.fonts&&d.fonts.load);if(!fontOK){d.fonts.load('700 1em Disp').then(function(){fontOK=1},function(){fontOK=1});setTimeout(function(){fontOK=1},1000)}
-['loadedmetadata','loadeddata','canplay'].forEach(function(e){hv.addEventListener(e,function(){if(!paused&&hv.paused)tryPlay(hv)})});function land(){if(pay.classList.contains('on'))return;if(!fontOK){if(!lq){lq=1;setTimeout(function(){lq=0;land()},120)}return}if(!paused&&w2&&!w2.classList.contains('lit')){if(!lq){lq=1;setTimeout(function(){lq=0;land()},200)}return}var now=performance.now();if(!w2t)w2t=now;if(!paused&&now-w2t<650){if(!lq){lq=1;setTimeout(function(){lq=0;land()},650-(now-w2t))}return}if(window.__ekgBig)__ekgBig();pay.classList.add('on')}
-if(w2&&window.MutationObserver)new MutationObserver(function(){if(!w2t&&w2.classList.contains('lit'))w2t=performance.now()}).observe(w2,{attributes:true,attributeFilter:['class']});
+var hv=d.getElementById('heroVid'),pay=d.querySelector('.payoff'),PAY=5.75;
+function land(){if(!pay.classList.contains('on')&&window.__ekgBig)__ekgBig();pay.classList.add('on')}
 hv.addEventListener('timeupdate',function(){if(hv.currentTime>=PAY)land()});
-setTimeout(land,Math.max(0,3800-performance.now()));
+setTimeout(land,9000);
 function tryPlay(v){var p=v.play();if(p&&p.catch)p.catch(function(){})}
-// r18: the film holds on its first frame (= poster) until the intro opens, then plays from 0 with no seek
-tryPlay(hv);d.addEventListener('pointerdown',function(){if(!paused)tryPlay(hv)},{once:true});
+tryPlay(hv);
+d.addEventListener('pointerdown',function(){if(!paused)tryPlay(hv)},{once:true});
 // lazy play on screen
 var lz=[].slice.call(d.querySelectorAll('video.lazyplay'));
 var io=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(e.isIntersecting&&!paused){if(!v.src&&v.dataset.src){v.preload='auto';v.src=v.dataset.src}tryPlay(v)}else v.pause()})},{threshold:.15});
@@ -81,10 +79,10 @@ if(matchMedia('(hover:none)').matches){var cio2=new IntersectionObserver(functio
 (function(){
  var cv=d.getElementById('ekg');if(!cv)return;var cx=cv.getContext('2d'),W,H,Y,dpr=Math.min(2,devicePixelRatio||1),px=-1e4,pv=0,lastX=null,big=0,on=true;
  var hf=d.querySelector('.hero .hero-film'),words=[].slice.call(d.querySelectorAll('.hero .hl .w')),hero=d.querySelector('.hero');
- var T0=performance.now(),DRAW=.45,OPEN=.6,BEAT0=DRAW+OPEN,opened=false,LW=1.984,acc=LW,HX=0,LB=0,FB=0,HT=0;/* motion always plays: ignores prefers-reduced-motion by design. r31: one steady two-beat trace from the first frame; no intro line, no draw-in, no timed fade; the full two-beat trace is there on frame one */
+ var T0=performance.now(),DRAW=.45,OPEN=.6,BEAT0=DRAW+OPEN,per=1,opened=false,lit=0,acc=0,RM=false;/* motion always plays: ignores prefers-reduced-motion by design */
  hero.classList.add('intro-on');
  var PW=null;function panelW(){if(PW!==null)return PW;if(innerWidth<=900){cv.style.clipPath='none';return PW=W}var r=cv.getBoundingClientRect(),f=hf.getBoundingClientRect(),w=Math.max(0,Math.min(W,f.left-r.left));cv.style.clipPath='inset(0 '+(W-w)+'px 0 0)';return PW=w}
- function size(){PW=null;var r=cv.getBoundingClientRect(),hr=d.querySelector('.hero .hero-type').getBoundingClientRect(),lr=d.querySelector('.hero .lede').getBoundingClientRect(),tk=d.querySelector('.ticker'),tr=tk?tk.getBoundingClientRect():null,f=hf.getBoundingClientRect();W=r.width;var hlr=d.querySelector('.hero .hl').getBoundingClientRect();HX=hlr.left-r.left;FB=f.bottom-r.top;HT=hlr.top-r.top;LB=lr.bottom-r.top;H=r.height;var y=Math.max(H*.28,hr.top-r.top-46);if(innerWidth<=900){var tt=tr?tr.top-r.top:H;y=Math.round((lr.bottom-r.top+tt)/2+8)}Y=y;PW=innerWidth<=900?W:Math.max(0,Math.min(W,f.left-r.left));var nw=Math.round(W*dpr),nh=Math.round(H*dpr);if(cv.width!==nw||cv.height!==nh){cv.width=nw;cv.height=nh}cx.setTransform(dpr,0,0,dpr,0,0);cv.style.clipPath=innerWidth<=900?'none':'inset(0 '+(W-PW)+'px 0 0)'}
+ function size(){PW=null;var r=cv.getBoundingClientRect(),hr=d.querySelector('.hero .hero-type').getBoundingClientRect(),lr=d.querySelector('.hero .lede').getBoundingClientRect(),tk=d.querySelector('.ticker'),tr=tk?tk.getBoundingClientRect():null,f=hf.getBoundingClientRect();W=r.width;H=r.height;var y=Math.max(H*.28,hr.top-r.top-46);if(innerWidth<=900){var tt=tr?tr.top-r.top:H;y=Math.round((lr.bottom-r.top+tt)/2+8)}Y=y;PW=innerWidth<=900?W:Math.max(0,Math.min(W,f.left-r.left));var nw=Math.round(W*dpr),nh=Math.round(H*dpr);if(cv.width!==nw||cv.height!==nh){cv.width=nw;cv.height=nh}cx.setTransform(dpr,0,0,dpr,0,0);cv.style.clipPath=innerWidth<=900?'none':'inset(0 '+(W-PW)+'px 0 0)'}
  size();var rsT;addEventListener('resize',function(){cancelAnimationFrame(rsT);rsT=requestAnimationFrame(size)});addEventListener('load',function(){requestAnimationFrame(size)});if(d.fonts&&d.fonts.ready)d.fonts.ready.then(function(){requestAnimationFrame(size)});
  function qrs(u){if(u<-1||u>1)return 0;return u<-.55?-.12*Math.sin((u+1)/.45*Math.PI):u<-.15?0:u<-.05?.25*((u+.15)/.1):u<.05?-1*(1-Math.abs(u)/.05):u<.13?.55*(1-(u-.05)/.08):u<.4?0:-.22*Math.sin((u-.4)/.6*Math.PI)}
  var hs=d.querySelector('.hero-stage');
@@ -92,44 +90,36 @@ if(matchMedia('(hover:none)').matches){var cio2=new IntersectionObserver(functio
  hs.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var r=cv.getBoundingClientRect(),x=e.clientX-r.left;if(lastX!=null)pv=Math.min(1,pv+Math.abs(x-lastX)/120);lastX=x;px=x});
  hs.addEventListener('pointerleave',function(){lastX=null});
  hs.addEventListener('pointerdown',function(e){if(e.pointerType!=='mouse')return;var r=cv.getBoundingClientRect();px=e.clientX-r.left;pv=1});
- window.__ekgBig=function(){};
+ window.__ekgBig=function(){big=1};
  window.__ekgKick=function(v){pv=Math.min(1.4,Math.max(pv,Math.abs(v)/40));if(px<0||px>W)px=W*.5};
  function clip(k){k=.4+.6*k;hf.style.clipPath=k>=1?'none':'inset('+(50*(1-k))+'% 0 '+(50*(1-k))+'% 0)'}
- function finish(){if(opened)return;opened=true;clip(1);hero.classList.remove('intro-on');words.forEach(function(w){if(!w.classList.contains('payoff'))w.classList.add('lit')});window.__heroOpen=1;tryPlay(hv)}
+ function finish(){if(opened)return;opened=true;clip(1);hero.classList.remove('intro-on');words.forEach(function(w){if(!w.classList.contains('payoff'))w.classList.add('lit')});try{hv.currentTime=0;tryPlay(hv)}catch(e){}}
  window.__introDone=function(){finish();words.forEach(function(w){w.classList.add('lit')})};
  clip(0);setTimeout(finish,6000);
  var io=new IntersectionObserver(function(es){on=es[0].isIntersecting});io.observe(hs);
  function ease(k){return k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2}
  var lastOp=-1;function frame(now){requestAnimationFrame(frame);if(!on){window.__lt=now;return}
   var ly2=(Y||0)-(window.scrollY||0)-(innerWidth<=900?40:140),op=Math.max(0,Math.min(1,(ly2-90)/80));op=Math.round(op*20)/20;if(op!==lastOp){lastOp=op;cv.style.opacity=op}
-  var Wl=panelW(),t=(now-T0)/1000,ph0=innerWidth<=900,still=paused;
+  var steady=false,env=1,Wl=panelW(),t=(now-T0)/1000,amp=innerWidth<=900?30:Math.min(120,H*.14),bw=Math.min(180,W*.13),yl,head,drawTo=Wl,introAmp=0;
   if(paused&&!opened)finish();
-  // the film still opens out of black exactly as before; the trace is independent of it
-  if(!opened){if(t<DRAW)clip(0);else if(t<BEAT0)clip(ease((t-DRAW)/OPEN));else finish()}
-  // r32: edge to edge. The trace spans the whole black panel (phone: the whole width), still exactly two beats; spikes keep the r31 size,
-  // only the flat baseline between them stretches. Phone/tablet: the spike stays 12px clear of the lede above it. It scrolls at the original pre-r31 drawing speed, clamp(panel/4, 120, 240) px/s.
-  // r33 phone (<640px): the trace sits in the black band between the film and the headline, same spike size, centred in the band;
-  // beats 2.0s apart (scroll = one beat spacing per 2s). Tablet/desktop unchanged.
-  var ph1=innerWidth<640,sh=Math.max(40,((ph0?W*.7:Wl*.58)-(ph0?HX+24:HX+Wl*.12))/2),amp=ph1?Math.max(12,Math.min(sh*.4,(HT-FB-20)/1.395)):ph0?Math.max(12,Math.min(sh*.4,(Y-LB-12)/.9)):sh*.4,bw2=amp*1.05,tipX=Math.max(4,Wl-3),VPX=Math.min(240,Math.max(120,Wl/4)),LW0=2,sp=tipX/LW0;LW=2-(.04*bw2+1.5)/sp;sp=tipX/LW;
-  if(ph1){Y=(FB+HT)/2+.2025*amp;VPX=sp/2}
-  var dt=Math.min(.05,(now-(window.__lt||now))/1000),rate=1+Math.min(.3,pv*.3);if(!still)acc+=dt*rate*VPX/sp;if(acc<LW)acc=LW;
-  pv*=.94;cx.clearRect(0,0,W,H);cx.globalAlpha=1;
-  if(!(Wl>2)||!(W>2)||!isFinite(acc)||!isFinite(Y)){window.__lt=now;return}
-  // a live monitor strip above the headline: the tip stays at the panel edge, the trace scrolls left under it. The window is
-  // just under two beat spacings, so the old spike leaves the left edge as the new one rises at the tip = exactly two beats.
-  var REV=LW,yl=Y,CT=ph1?Math.max(0,FB):0;cx.save();cx.beginPath();cx.rect(0,CT,Wl,H-CT);cx.clip();
-  function yt(tau){var u=(((tau%1)+1)%1-.5)*sp/bw2;return yl+qrs(u)*amp*.9}
-  cx.lineWidth=ph0?3.5:3;cx.lineJoin='round';cx.lineCap='round';if(ph0){cx.shadowColor='rgba(0,0,0,.7)';cx.shadowBlur=6}
-  var T1=acc,T0s=acc-REV,N=Math.max(1,Math.ceil(REV*sp)),ts=[],KU=[-.15,-.05,0,.05,.13];
-  // samples every 1px plus the exact corners of each spike, so every spike draws at its full height in every frame
-  for(var q=0;q<=N;q++)ts.push(T0s+REV*q/N);for(var m=Math.floor(T0s)-1;m<=T1;m++)KU.forEach(function(u){var tau=m+.5+u*bw2/sp;if(tau>T0s&&tau<T1)ts.push(tau)});ts.sort(function(a,b){return a-b});
-  for(var k=0;k<ts.length-1;k+=2){cx.beginPath();for(var q=k;q<=Math.min(ts.length-1,k+2);q++){var tau=ts[q],x=tipX-(T1-tau)*sp,y=yt(tau);q===k?cx.moveTo(x,y):cx.lineTo(x,y)}
-   var tk=ts[k],age=(T1-tk)/LW,fin=1;cx.strokeStyle='rgba(207,45,32,'+((1-.72*age)*fin).toFixed(3)+')';cx.stroke()}
-  cx.shadowBlur=0;if(!ph0){cx.fillStyle='#cf2d20';cx.fillRect(Wl-2,yl-9,2,18)}
-  var gy=yt(acc);if(!still&&isFinite(gy)){var gr=cx.createRadialGradient(tipX,gy,0,tipX,gy,14);gr.addColorStop(0,'rgba(255,190,170,.95)');gr.addColorStop(.35,'rgba(255,80,60,.6)');gr.addColorStop(1,'rgba(207,45,32,0)');cx.fillStyle=gr;cx.beginPath();cx.arc(tipX,gy,14,0,7);cx.fill();cx.fillStyle='#fff3ee';cx.beginPath();cx.arc(tipX,gy,3,0,7);cx.fill()}
-  cx.restore();var spikes=[];for(var m=Math.ceil(T0s-.5);m+.5<=T1;m++){if(m+.5>=T0s)spikes.push(Math.round(tipX-(T1-m-.5)*sp))}
-  window.__ekgState={tipX:tipX,tailX:tipX-REV*sp,beats:spikes.length,spikes:spikes,right:tipX+14,panel:Wl,Y:yl,top:yl-amp*.9,sp:sp,pxps:VPX,period:sp/VPX,acc:acc,full:REV>=LW};
-  window.__lt=now;
+  if(t<DRAW&&!opened){var k=t/DRAW;drawTo=Wl*ease(k);head=Wl*.56;yl=H/2;introAmp=1.6;clip(0)}
+  else if(t<BEAT0&&!opened){var k2=ease((t-DRAW)/OPEN);clip(k2);yl=H/2+(Y-H/2)*k2;head=Wl*.56;introAmp=1.6*(1-k2)}
+  else{if(!opened){finish();T0=now-BEAT0*1000;t=BEAT0}
+   yl=Y;var dt=Math.min(.05,(now-(window.__lt||now))/1000),rate=1+Math.min(.3,pv*.3);acc+=dt*rate;var bt=acc,ph=(bt%per)/per;steady=true;head=paused?Wl*.6:((acc*Math.max(90,Wl/7))%(Wl+400))-200;env=paused?1:.18+.82*Math.exp(-ph/.16);
+   var n=Math.floor(bt/per);if(!paused&&lit<2&&n>=lit&&ph>.35){words[lit]&&words[lit].classList.add('lit');lit++}}
+  pv*=.94;big*=.97;cx.clearRect(0,0,W,H);
+  if(steady){if(!(Wl>2)||!(W>2)||!isFinite(acc)){window.__lt=now;return}var sp=Math.min(240,Math.max(120,Wl/4)),bw2=Math.min(bw,sp*.42),sx=(acc*sp)%Wl,still=paused;
+   function yt(tau){var u=(((tau%1)+1)%1-.5)*sp/bw2;return yl+qrs(u)*amp*.9}
+   cx.lineWidth=innerWidth<=900?3.5:3;cx.lineJoin='round';cx.lineCap='round';if(innerWidth<=900){cx.shadowColor='rgba(0,0,0,.7)';cx.shadowBlur=6}
+   var T1=acc,T0s=still?acc-2:Math.max(0,acc-2),N=Math.ceil((T1-T0s)*sp/2),seg=8,px0=null;
+   for(var k=0;k<N;k+=seg){cx.beginPath();var started=false;for(var q=k;q<=Math.min(N,k+seg);q++){var tau=T0s+(T1-T0s)*q/N,x=((tau*sp)%Wl+Wl)%Wl,y=yt(tau);if(started&&x<px0){cx.stroke();cx.beginPath();started=false}started?cx.lineTo(x,y):cx.moveTo(x,y);started=true;px0=x}
+    var age=(T1-(T0s+(T1-T0s)*k/N))/2;cx.strokeStyle='rgba(207,45,32,'+(1-.7*age).toFixed(3)+')';cx.stroke()}
+   cx.shadowBlur=0;if(innerWidth>900&&isFinite(yl)){cx.fillStyle='#cf2d20';cx.fillRect(Wl-2,yl-9,2,18)}if(!COARSE&&!still&&isFinite(sx)&&isFinite(yt(acc))){var gy=yt(acc);var gr=cx.createRadialGradient(sx,gy,0,sx,gy,14);gr.addColorStop(0,'rgba(255,190,170,.95)');gr.addColorStop(.35,'rgba(255,80,60,.6)');gr.addColorStop(1,'rgba(207,45,32,0)');cx.fillStyle=gr;cx.beginPath();cx.arc(sx,gy,14,0,7);cx.fill();cx.fillStyle='#fff3ee';cx.beginPath();cx.arc(sx,gy,3,0,7);cx.fill()}
+   window.__ekgState={sx:sx,beats:Math.round(acc)-Math.round(Math.max(0,acc-2)),acc:acc};
+   window.__lt=now;return}cx.lineWidth=3;cx.lineJoin='round';cx.lineCap='round';cx.beginPath();
+  for(var x=0;x<=Math.min(drawTo,Wl);x+=2){var a=introAmp?introAmp:(1+big*1.4);var y=qrs((x-head)/bw)*amp*a*env+qrs((x-px)/(bw*.7))*amp*1.3*pv;x?cx.lineTo(x,yl+y):cx.moveTo(x,yl+y)}
+  if(introAmp||paused){cx.strokeStyle='#cf2d20'}else{cx.strokeStyle='#cf2d20'}
+  cx.stroke();window.__lt=now;
  }
  requestAnimationFrame(frame);
 })();
