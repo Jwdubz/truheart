@@ -174,9 +174,9 @@ video{display:block;width:100%;height:100%;object-fit:cover;background:#111}
 .js .hero-film{animation:open 1.25s cubic-bezier(.77,0,.18,1) .35s both}
 @keyframes open{from{clip-path:inset(49.6% 0 49.6% 0)}to{clip-path:inset(0 0 0 0)}}
 .hero .hero-grid{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;justify-content:space-between;gap:40px;padding:0 var(--pad) clamp(28px,5vh,56px);grid-template-areas:none}
-.hero .hl{font-size:clamp(76px,10.4vw,210px);color:#fff;text-shadow:0 2px 24px rgba(0,0,0,.35)}
-.hero .eyebrow{color:#fff;opacity:1;text-shadow:0 1px 10px rgba(0,0,0,.45)}
-.hero .lede{color:#fff;opacity:1;max-width:28ch;margin:0;padding:0;text-shadow:0 1px 12px rgba(0,0,0,.5)}
+.hero .hl{font-size:clamp(76px,10.4vw,210px);color:#fff}
+.hero .eyebrow{color:#fff;opacity:1}
+.hero .lede{color:#fff;opacity:1;max-width:28ch;margin:0;padding:0}
 .hero .ticker{position:relative;margin:0}
 .bar{position:fixed}
 .mbtn{display:inline-flex;align-items:center;gap:10px}
@@ -610,7 +610,7 @@ section[id]{scroll-margin-top:0}
 /* header: always visible, no solid band */
 .bar.solid,.bar{background:transparent!important}
 .bar.hide{transform:none}
-.bar .logo,.bar a:first-child{text-shadow:0 1px 10px rgba(0,0,0,.55)}
+.bar .logo,.bar a:first-child{text-shadow:none}
 @media (max-width:900px){.bar #pause{margin-left:auto;margin-right:14px}.bar-ctas{gap:16px}}
 /* menu hierarchy: sections big, actions small */
 .menu{justify-content:center}
@@ -667,10 +667,10 @@ section[id]{scroll-margin-top:0}
  .hero .hero-film video{object-position:50% 20%}
  .hero .hero-type{max-width:none;position:relative;z-index:3}
  .hero .hl{font-size:clamp(76px,9.4vw,190px)}
- .hero .lede{position:relative;z-index:3;text-shadow:0 1px 14px rgba(0,0,0,.85)}
+ .hero .lede{position:relative;z-index:3}
 }
 .hero .hero-film::after{content:"";position:absolute;inset:auto 0 0 0;height:46%;background:linear-gradient(to top,rgba(5,5,5,.86),rgba(5,5,5,.5) 45%,rgba(5,5,5,0));pointer-events:none}
-@media (max-width:900px){.hero .hero-film::after{height:62%;background:linear-gradient(to top,rgba(5,5,5,.9),rgba(5,5,5,.62) 50%,rgba(5,5,5,0))}.hero .lede,.hero .eyebrow{text-shadow:0 1px 10px rgba(0,0,0,.8)}}
+@media (max-width:900px){.hero .hero-film::after{height:62%;background:linear-gradient(to top,rgba(5,5,5,.9),rgba(5,5,5,.62) 50%,rgba(5,5,5,0))}.hero .lede,.hero .eyebrow{text-shadow:none}}
 /* header backing that follows the section under it */
 .bar.solid{background:var(--hb,#0b0b0b)!important;color:var(--hf,#f3f1ec)!important;box-shadow:0 1px 0 rgba(0,0,0,.08)}
 .bar.solid .mark{text-shadow:none}
@@ -934,7 +934,7 @@ body{transition:none}
 .eyebrow{display:none!important}
 .hero .hero-film,.hero .hero-film video,.hero-film,.hero-film video,video,img{-webkit-mask-image:none!important;mask-image:none!important}
 .hero .hero-film::before,.hero .hero-film::after{content:none!important;display:none!important;animation:none!important}
-.hero .hl,.hero .lede{text-shadow:0 1px 3px rgba(0,0,0,.6)!important}
+.hero .hl,.hero .lede{text-shadow:none}
 
 /* ===== r15: SOTD R14 fixes ===== */
 html,body{overflow-x:clip}
@@ -1052,7 +1052,7 @@ html,body{overflow-x:clip}
 .case,.case *{opacity:1}
 /* 10: headline lights by brightness only, no red glow flash */
 @keyframes wl{0%{opacity:.16}100%{opacity:1}}
-.hero .hl .w{text-shadow:0 1px 3px rgba(0,0,0,.6)!important}
+.hero .hl .w{text-shadow:none}
 /* 4: pinned chart: heading and top label clear the header */
 @media (min-width:901px){
  .pulse-pin{padding-top:max(11vh,118px)!important}
